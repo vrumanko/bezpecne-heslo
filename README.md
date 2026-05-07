@@ -70,13 +70,6 @@ Funguje vo všetkých moderných prehliadačoch:
 
 ---
 
-## Štruktúra projektu
-
-```text
-bezpecne-heslo/
-└── index.html
-```
-
 Celá aplikácia je v jednom súbore.
 
 ---
