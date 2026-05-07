@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+  <meta name="description" content="Generátor bezpečných hesiel – vytvorte si silné heslo jedným kliknutím. Bez sledovania, bez serverov.">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <meta name="robots" content="index,follow">
+  <title>Bezpečné Heslo – Generátor silných hesiel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --color-primary: #6366f1;
+      --color-primary-dark: #4f46e5;
+      --color-text: #111827;
+      --color-text-muted: #6b7280;
+      --color-text-faint: #9ca3af;
+      --color-border: #e5e7eb;
+      --color-surface: #ffffff;
+      --color-surface-soft: #f9fafb;
+      --color-surface-softer: #f8f9fb;
+      --shadow-card: 0 8px 40px rgba(0, 0, 0, 0.07), 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f0f4ff 0%, #fafafa 60%, #f5f0ff 100%);
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: var(--color-text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .card {
+      background: var(--color-surface);
+      border-radius: 24px;
+      box-shadow: var(--shadow-card);
+      padding: 2.5rem 2.25rem;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      text-align: center;
+      margin-bottom: 1.875rem;
+    }
+
+    .app-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      border-radius: 14px;
+      margin-bottom: 0.875rem;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    }
+
+    .app-icon svg {
+      width: 26px;
+      height: 26px;
+      fill: #ffffff;
+    }
+
+    .app-title {
+      font-size: 1.625rem;
+      font-weight: 700;
+      color: var(--color-text);
+      letter-spacing: -0.4px;
+      line-height: 1.15;
+    }
+
+    .app-subtitle {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+      font-weight: 400;
+    }
+
+    /* ── Password row ── */
+    .password-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      align-items: stretch;
+    }
+
+    .password-field {
+      flex: 1;
+      min-width: 0;
+      font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      color: var(--color-text);
+      background: var(--color-surface-soft);
+      outline: none;
+      transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.04em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .password-field:focus {
+      border-color: var(--color-primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    .password-field.stale {
+      color: var(--color-text-faint);
+      background: #f3f4f6;
+      border-color: var(--color-border);
+      box-shadow: none;
+    }
+
+    .password-field.generated {
+      animation: pulse 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes pulse {
+      0%   { transform: scale(1);    border-color: var(--color-border); }
+      40%  { transform: scale(1.012); border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18); }
+      100% { transform: scale(1);    border-color: var(--color-border); }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      padding: 0.75rem 1.125rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.18s, transform 0.12s, box-shadow 0.18s, opacity 0.18s, border-color 0.18s;
+      white-space: nowrap;
+      font-family: inherit;
+      line-height: 1;
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid rgba(99, 102, 241, 0.35);
+      outline-offset: 2px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.38);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(99, 102, 241, 0.42);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 2px solid var(--color-border);
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e9ebef;
+      border-color: #d1d5db;
+    }
+
+    .btn-secondary:active:not(:disabled) {
+      background: #e2e5ea;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary.copied {
+      background: #ecfdf5;
+      border-color: #6ee7b7;
+      color: #047857;
+    }
+
+    .btn svg {
+      flex-shrink: 0;
+    }
+
+    /* ── Strength indicator ── */
+    .strength-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .strength-bar {
+      display: flex;
+      gap: 4px;
+      height: 8px;
+      margin-bottom: 0.625rem;
+    }
+
+    .strength-seg {
+      flex: 1;
+      background: var(--color-border);
+      border-radius: 999px;
+      transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .strength-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+
+    .strength-label {
+      font-size: 0.8125rem;
+      color: var(--color-text-faint);
+      font-weight: 400;
+    }
+
+    .strength-text {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      transition: color 0.35s;
+      color: var(--color-text-faint);
+    }
+
+    .strength-info {
+      font-size: 0.75rem;
+      color: var(--color-text-faint);
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Stats chips ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.625rem;
+      margin-bottom: 1.875rem;
+    }
+
+    .stat-chip {
+      background: var(--color-surface-softer);
+      border: 1px solid #f0f0f5;
+      border-radius: 12px;
+      padding: 0.625rem 0.5rem;
+      text-align: center;
+    }
+
+    .stat-chip-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-chip-label {
+      font-size: 0.625rem;
+      color: var(--color-text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 500;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: #f3f4f6;
+      margin-bottom: 1.75rem;
+    }
+
+    /* ── Sliders ── */
+    .sliders-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.375rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.625rem;
+    }
+
+    .slider-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .slider-value-badge {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      min-width: 2rem;
+      padding: 0.1875rem 0.5rem;
+      border-radius: 999px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--color-border);
+      outline: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    input[type="range"]:focus-visible {
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 3px 12px rgba(99, 102, 241, 0.48);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 999px;
+    }
+
+    /* ── Options (toggle) ── */
+    .options-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1rem;
+      background: var(--color-surface-softer);
+      border: 1px solid #f0f0f5;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      gap: 1rem;
+    }
+
+    .toggle-row:hover {
+      background: #f3f4f6;
+      border-color: #e5e7eb;
+    }
+
+    .toggle-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      min-width: 0;
+    }
+
+    .toggle-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .toggle-hint {
+      font-size: 0.75rem;
+      color: var(--color-text-faint);
+      font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider-bg {
+      position: absolute;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 999px;
+      transition: background 0.22s;
+    }
+
+    .toggle-slider-bg::before {
+      content: '';
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      top: 2px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+    }
+
+    .toggle-switch input:checked + .toggle-slider-bg {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    }
+
+    .toggle-switch input:checked + .toggle-slider-bg::before {
+      transform: translateX(18px);
+    }
+
+    .toggle-switch input:focus-visible + .toggle-slider-bg {
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 1.75rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--color-text);
+      color: #fff;
+      padding: 0.625rem 1.375rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+      z-index: 50;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+      background: #b91c1c;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      .card { padding: 1.75rem 1.25rem; }
+      .app-title { font-size: 1.375rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .password-row { flex-wrap: wrap; }
+      .password-field { flex-basis: 100%; }
+      .strength-meta { flex-wrap: wrap; gap: 0.25rem; }
+    }
+
+    /* ── Reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+
+    <header class="app-header">
+      <div class="app-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1C8.676 1 6 3.676 6 7v1H4a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v1H8V7c0-2.276 1.724-4 4-4zm0 9a2 2 0 0 1 1 3.732V17a1 1 0 0 1-2 0v-1.268A2 2 0 0 1 12 12z"/>
+        </svg>
+      </div>
+      <h1 class="app-title">Bezpečné Heslo</h1>
+      <p class="app-subtitle">Generátor silných hesiel</p>
+    </header>
+
+    <div class="password-row">
+      <input
+        type="text"
+        id="passwordField"
+        class="password-field"
+        readonly
+        placeholder="Stlačte Generovať…"
+        aria-label="Vygenerované heslo"
+        spellcheck="false"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+      />
+      <button class="btn btn-primary" id="generateBtn" type="button" aria-label="Generovať nové heslo">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        Generovať
+      </button>
+      <button class="btn btn-secondary" id="copyBtn" type="button" disabled aria-label="Kopírovať heslo do schránky">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
+    </div>
+
+    <section class="strength-section" aria-live="polite" aria-atomic="true" aria-label="Sila hesla">
+      <div class="strength-bar" id="strengthBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="5">
+        <div class="strength-seg"></div>
+        <div class="strength-seg"></div>
+        <div class="strength-seg"></div>
+        <div class="strength-seg"></div>
+        <div class="strength-seg"></div>
+      </div>
+      <div class="strength-meta">
+        <span class="strength-label">Sila hesla</span>
+        <span class="strength-text" id="strengthText">—</span>
+      </div>
+      <div class="strength-info" id="strengthInfo">Stlačte Generovať pre nové heslo</div>
+    </section>
+
+    <div class="stats-row">
+      <div class="stat-chip">
+        <div class="stat-chip-value" id="statChars">—</div>
+        <div class="stat-chip-label">Znakov</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-chip-value" id="statLetters">—</div>
+        <div class="stat-chip-label">Písmen</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-chip-value" id="statDigits">—</div>
+        <div class="stat-chip-label">Číslic</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-chip-value" id="statSpecial">—</div>
+        <div class="stat-chip-label">Špeciálnych</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sliders-section">
+      <div class="slider-row">
+        <div class="slider-header">
+          <label class="slider-label" for="sliderLength">Počet znakov</label>
+          <span class="slider-value-badge" id="valLength">16</span>
+        </div>
+        <input type="range" id="sliderLength" min="4" max="64" value="16" aria-label="Počet znakov">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <label class="slider-label" for="sliderDigits">Počet číslic</label>
+          <span class="slider-value-badge" id="valDigits">3</span>
+        </div>
+        <input type="range" id="sliderDigits" min="0" max="64" value="3" aria-label="Počet číslic">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <label class="slider-label" for="sliderSpecial">Počet špeciálnych znakov</label>
+          <span class="slider-value-badge" id="valSpecial">3</span>
+        </div>
+        <input type="range" id="sliderSpecial" min="0" max="64" value="3" aria-label="Počet špeciálnych znakov">
+      </div>
+    </div>
+
+    <div class="options-section">
+      <label class="toggle-row" for="excludeSimilar">
+        <span class="toggle-info">
+          <span class="toggle-text">Vylúčiť podobné znaky</span>
+          <span class="toggle-hint">Vynechá I, l, 1, O, 0</span>
+        </span>
+        <span class="toggle-switch">
+          <input type="checkbox" id="excludeSimilar">
+          <span class="toggle-slider-bg" aria-hidden="true"></span>
+        </span>
+      </label>
+    </div>
+
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Heslo skopírované!</div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ── Constants ────────────────────────────────────────────────────────
+      const POOLS = Object.freeze({
+        lowercase: 'abcdefghijklmnopqrstuvwxyz',
+        uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        digits:    '0123456789',
+        special:   '!@#$%^&*()-_=+[]{}|;:,.<>?',
+      });
+
+      // Glyphs commonly confused on monospace screens.
+      const SIMILAR = new Set(['i', 'I', 'l', 'L', '1', 'o', 'O', '0']);
+
+      const STRENGTH_LEVELS = Object.freeze([
+        { label: 'Veľmi slabé', color: '#ef4444' },
+        { label: 'Slabé',       color: '#f97316' },
+        { label: 'Primerané',   color: '#eab308' },
+        { label: 'Silné',       color: '#22c55e' },
+        { label: 'Veľmi silné', color: '#16a34a' },
+      ]);
+
+      // Conservative offline attack assumption: ~10^10 guesses/sec
+      // (e.g. unsalted MD5 / NTLM on a modern GPU cluster).
+      const GUESSES_PER_SECOND = 1e10;
+
+      const SETTINGS_KEY = 'bezpecneHeslo:settings:v1';
+      const MIN_LENGTH = 4;
+      const MAX_LENGTH = 64;
+      const DEFAULTS = Object.freeze({
+        length: 16,
+        digits: 3,
+        special: 3,
+        excludeSimilar: false,
+      });
+
+      // ── Utilities ────────────────────────────────────────────────────────
+      const $ = id => document.getElementById(id);
+
+      function clampInt(value, min, max, fallback) {
+        const n = Number.parseInt(value, 10);
+        if (!Number.isFinite(n)) return fallback;
+        return Math.max(min, Math.min(max, n));
+      }
+
+      // Slovak grammatical agreement: 1 / 2-4 / 5+
+      function pluralize(n, singular, few, many) {
+        if (n === 1) return singular;
+        if (n >= 2 && n <= 4) return few;
+        return many;
+      }
+
+      function formatN(n, singular, few, many) {
+        return `${n} ${pluralize(n, singular, few, many)}`;
+      }
+
+      // ── Crypto-secure random integer in [0, max). ────────────────────────
+      // Uses rejection sampling to eliminate modulo bias.
+      function cryptoRandInt(max) {
+        if (!Number.isInteger(max) || max <= 0) {
+          throw new RangeError('cryptoRandInt: max must be a positive integer');
+        }
+        if (max === 1) return 0;
+        const arr = new Uint32Array(1);
+        const ceiling = Math.floor(0x100000000 / max) * max;
+        let r;
+        do {
+          crypto.getRandomValues(arr);
+          r = arr[0];
+        } while (r >= ceiling);
+        return r % max;
+      }
+
+      // ── Pool building ────────────────────────────────────────────────────
+      function filterSimilar(s, exclude) {
+        if (!exclude) return s;
+        return [...s].filter(c => !SIMILAR.has(c)).join('');
+      }
+
+      function buildPools(excludeSimilar) {
+        return {
+          letters: filterSimilar(POOLS.lowercase + POOLS.uppercase, excludeSimilar),
+          digits:  filterSimilar(POOLS.digits, excludeSimilar),
+          // Special chars don't suffer the I/l/0/O confusion problem.
+          special: POOLS.special,
+        };
+      }
+
+      // ── Password generation ──────────────────────────────────────────────
+      function generate(length, digitCount, specialCount, excludeSimilar) {
+        const pools = buildPools(excludeSimilar);
+        const letterCount = length - digitCount - specialCount;
+        if (letterCount < 0) {
+          throw new Error('digits + special exceeds length');
+        }
+        if (letterCount > 0 && pools.letters.length === 0) {
+          throw new Error('letter pool is empty');
+        }
+        if (digitCount > 0 && pools.digits.length === 0) {
+          throw new Error('digit pool is empty');
+        }
+        if (specialCount > 0 && pools.special.length === 0) {
+          throw new Error('special pool is empty');
+        }
+
+        const chars = new Array(length);
+        let idx = 0;
+        for (let i = 0; i < letterCount;  i++) chars[idx++] = pools.letters[cryptoRandInt(pools.letters.length)];
+        for (let i = 0; i < digitCount;   i++) chars[idx++] = pools.digits[cryptoRandInt(pools.digits.length)];
+        for (let i = 0; i < specialCount; i++) chars[idx++] = pools.special[cryptoRandInt(pools.special.length)];
+
+        // Fisher-Yates: prevent character classes from clustering by index.
+        for (let i = chars.length - 1; i > 0; i--) {
+          const j = cryptoRandInt(i + 1);
+          [chars[i], chars[j]] = [chars[j], chars[i]];
+        }
+        return chars.join('');
+      }
+
+      // ── Strength estimation ──────────────────────────────────────────────
+      function calculateEntropy(length, digits, special, letters, excludeSimilar) {
+        const pools = buildPools(excludeSimilar);
+        let charsetSize = 0;
+        if (letters > 0) charsetSize += pools.letters.length;
+        if (digits  > 0) charsetSize += pools.digits.length;
+        if (special > 0) charsetSize += pools.special.length;
+        if (charsetSize === 0) return 0;
+        return length * Math.log2(charsetSize);
+      }
+
+      function entropyToScore(entropy) {
+        if (entropy < 28) return 0;
+        if (entropy < 40) return 1;
+        if (entropy < 60) return 2;
+        if (entropy < 80) return 3;
+        return 4;
+      }
+
+      function estimateCrackSeconds(entropy) {
+        // On average an attacker tries half the keyspace.
+        return Math.pow(2, entropy) / 2 / GUESSES_PER_SECOND;
+      }
+
+      function formatCrackTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds <= 0) return 'okamžite';
+        if (seconds < 1)        return 'menej ako sekundu';
+        if (seconds < 60)       return formatN(Math.floor(seconds),         'sekundu', 'sekundy', 'sekúnd');
+        if (seconds < 3600)     return formatN(Math.floor(seconds / 60),    'minútu',  'minúty',  'minút');
+        if (seconds < 86400)    return formatN(Math.floor(seconds / 3600),  'hodinu',  'hodiny',  'hodín');
+        if (seconds < 2629800)  return formatN(Math.floor(seconds / 86400), 'deň',     'dni',     'dní');
+        if (seconds < 31557600) return formatN(Math.floor(seconds / 2629800), 'mesiac', 'mesiace', 'mesiacov');
+
+        const years = seconds / 31557600;
+        if (years < 1000) return formatN(Math.floor(years), 'rok', 'roky', 'rokov');
+        if (years < 1e6) {
+          const k = Math.floor(years / 1000);
+          return `${k} tisíc rokov`;
+        }
+        if (years < 1e9) {
+          const m = Math.floor(years / 1e6);
+          return `${m} ${pluralize(m, 'milión', 'milióny', 'miliónov')} rokov`;
+        }
+        if (years < 1e12) {
+          const m = Math.floor(years / 1e9);
+          return `${m} ${pluralize(m, 'miliarda', 'miliardy', 'miliárd')} rokov`;
+        }
+        if (years < 1e15) {
+          const m = Math.floor(years / 1e12);
+          return `${m} ${pluralize(m, 'bilión', 'bilióny', 'biliónov')} rokov`;
+        }
+        const exp = Math.floor(Math.log10(years));
+        return `viac ako 10^${exp} rokov`;
+      }
+
+      function formatBits(n) {
+        return formatN(n, 'bit', 'bity', 'bitov');
+      }
+
+      // ── Settings persistence ─────────────────────────────────────────────
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(SETTINGS_KEY);
+          if (!raw) return { ...DEFAULTS };
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return { ...DEFAULTS };
+          return {
+            length:         clampInt(parsed.length,  MIN_LENGTH, MAX_LENGTH, DEFAULTS.length),
+            digits:         clampInt(parsed.digits,  0,          MAX_LENGTH, DEFAULTS.digits),
+            special:        clampInt(parsed.special, 0,          MAX_LENGTH, DEFAULTS.special),
+            excludeSimilar: typeof parsed.excludeSimilar === 'boolean' ? parsed.excludeSimilar : DEFAULTS.excludeSimilar,
+          };
+        } catch {
+          return { ...DEFAULTS };
+        }
+      }
+
+      function saveSettings(settings) {
+        try {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        } catch {
+          // private browsing / quota — degrade silently
+        }
+      }
+
+      // ── DOM bindings ─────────────────────────────────────────────────────
+      const sliderLength    = $('sliderLength');
+      const sliderDigits    = $('sliderDigits');
+      const sliderSpecial   = $('sliderSpecial');
+      const valLength       = $('valLength');
+      const valDigits       = $('valDigits');
+      const valSpecial      = $('valSpecial');
+      const passwordField   = $('passwordField');
+      const generateBtn     = $('generateBtn');
+      const copyBtn         = $('copyBtn');
+      const strengthBar     = $('strengthBar');
+      const strengthSegs    = strengthBar.querySelectorAll('.strength-seg');
+      const strengthText    = $('strengthText');
+      const strengthInfo    = $('strengthInfo');
+      const statChars       = $('statChars');
+      const statLetters     = $('statLetters');
+      const statDigits      = $('statDigits');
+      const statSpecial     = $('statSpecial');
+      const excludeSimilar  = $('excludeSimilar');
+      const toast           = $('toast');
+
+      // ── Slider track fill ────────────────────────────────────────────────
+      function updateSliderTrack(slider) {
+        const min = parseFloat(slider.min);
+        const max = parseFloat(slider.max);
+        const val = parseFloat(slider.value);
+        const pct = max > min ? ((val - min) / (max - min)) * 100 : 0;
+        slider.style.background =
+          `linear-gradient(to right, #6366f1 ${pct}%, #e5e7eb ${pct}%)`;
+      }
+
+      // ── Constraints: digits + special ≤ length ───────────────────────────
+      function enforceConstraints(changed) {
+        let total   = clampInt(sliderLength.value,  MIN_LENGTH, MAX_LENGTH, DEFAULTS.length);
+        let digits  = clampInt(sliderDigits.value,  0, MAX_LENGTH, DEFAULTS.digits);
+        let special = clampInt(sliderSpecial.value, 0, MAX_LENGTH, DEFAULTS.special);
+
+        if (changed === 'digits') {
+          special = Math.min(special, Math.max(0, total - digits));
+        } else if (changed === 'special') {
+          digits = Math.min(digits, Math.max(0, total - special));
+        } else {
+          // 'length' or initial sync — proportionally trim from the bottom.
+          if (digits + special > total) {
+            if (digits > total) { digits = total; special = 0; }
+            else { special = total - digits; }
+          }
+        }
+
+        sliderLength.value  = String(total);
+        sliderDigits.max    = String(total);
+        sliderSpecial.max   = String(total);
+        sliderDigits.value  = String(digits);
+        sliderSpecial.value = String(special);
+
+        valLength.textContent  = total;
+        valDigits.textContent  = digits;
+        valSpecial.textContent = special;
+
+        updateSliderTrack(sliderLength);
+        updateSliderTrack(sliderDigits);
+        updateSliderTrack(sliderSpecial);
+
+        return { total, digits, special };
+      }
+
+      // ── Stale state (slider/option changed since last generation) ────────
+      function markStale() {
+        passwordField.value = '';
+        passwordField.placeholder = 'Stlačte Generovať…';
+        passwordField.classList.add('stale');
+        passwordField.classList.remove('generated');
+        copyBtn.disabled = true;
+        copyBtn.classList.remove('copied');
+        clearStrength();
+        clearStats();
+      }
+
+      function clearStrength() {
+        strengthSegs.forEach(seg => { seg.style.background = ''; });
+        strengthBar.setAttribute('aria-valuenow', '0');
+        strengthText.textContent = '—';
+        strengthText.style.color = '';
+        strengthInfo.textContent = 'Stlačte Generovať pre nové heslo';
+      }
+
+      function clearStats() {
+        [statChars, statLetters, statDigits, statSpecial].forEach(el => {
+          el.textContent = '—';
+        });
+      }
+
+      // ── Strength UI ──────────────────────────────────────────────────────
+      function renderStrength(entropy) {
+        const score = entropyToScore(entropy);
+        const level = STRENGTH_LEVELS[score];
+
+        strengthSegs.forEach((seg, i) => {
+          seg.style.background = i <= score ? level.color : '';
+        });
+        strengthBar.setAttribute('aria-valuenow', String(score + 1));
+        strengthText.textContent = level.label;
+        strengthText.style.color = level.color;
+
+        const bits = Math.floor(entropy);
+        const seconds = estimateCrackSeconds(entropy);
+        strengthInfo.textContent =
+          `${formatBits(bits)} entropie · prelomenie ~${formatCrackTime(seconds)}`;
+      }
+
+      function renderStats(total, letters, digits, special) {
+        statChars.textContent   = total;
+        statLetters.textContent = letters;
+        statDigits.textContent  = digits;
+        statSpecial.textContent = special;
+      }
+
+      // ── Pulse animation on new password ──────────────────────────────────
+      function pulseField() {
+        passwordField.classList.remove('generated');
+        // Force reflow so re-adding the class restarts the animation.
+        void passwordField.offsetWidth;
+        passwordField.classList.add('generated');
+      }
+
+      // ── Handlers ─────────────────────────────────────────────────────────
+      function handleGenerate() {
+        const { total, digits, special } = enforceConstraints(null);
+        const letters = total - digits - special;
+        const exclude = excludeSimilar.checked;
+
+        let password;
+        try {
+          password = generate(total, digits, special, exclude);
+        } catch (err) {
+          // Should be unreachable under normal flow — log for diagnosis.
+          console.error('Heslo sa nepodarilo vygenerovať', {
+            total, digits, special, exclude, error: err && err.message,
+          });
+          showToast('Vygenerovanie zlyhalo', true);
+          return;
+        }
+
+        passwordField.value = password;
+        passwordField.placeholder = '';
+        passwordField.classList.remove('stale');
+        copyBtn.disabled = false;
+        copyBtn.classList.remove('copied');
+
+        const entropy = calculateEntropy(total, digits, special, letters, exclude);
+        renderStrength(entropy);
+        renderStats(total, letters, digits, special);
+        pulseField();
+        persistCurrentSettings();
+      }
+
+      async function handleCopy() {
+        const text = passwordField.value;
+        if (!text) return;
+
+        let ok = false;
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            ok = true;
+          } else {
+            ok = legacyCopy(text);
+          }
+        } catch {
+          ok = legacyCopy(text);
+        }
+
+        if (ok) {
+          copyBtn.classList.add('copied');
+          showToast('Heslo skopírované!');
+          setTimeout(() => copyBtn.classList.remove('copied'), 1400);
+        } else {
+          showToast('Kopírovanie zlyhalo', true);
+        }
+      }
+
+      function legacyCopy(text) {
+        try {
+          const wasReadOnly = passwordField.readOnly;
+          passwordField.readOnly = false;
+          passwordField.focus();
+          passwordField.setSelectionRange(0, text.length);
+          const ok = document.execCommand('copy');
+          passwordField.readOnly = wasReadOnly;
+          passwordField.blur();
+          return ok;
+        } catch {
+          return false;
+        }
+      }
+
+      function handleSliderChange(which) {
+        enforceConstraints(which);
+        markStale();
+        persistCurrentSettings();
+      }
+
+      function handleExcludeChange() {
+        markStale();
+        persistCurrentSettings();
+      }
+
+      function persistCurrentSettings() {
+        saveSettings({
+          length:         clampInt(sliderLength.value,  MIN_LENGTH, MAX_LENGTH, DEFAULTS.length),
+          digits:         clampInt(sliderDigits.value,  0, MAX_LENGTH, DEFAULTS.digits),
+          special:        clampInt(sliderSpecial.value, 0, MAX_LENGTH, DEFAULTS.special),
+          excludeSimilar: excludeSimilar.checked,
+        });
+      }
+
+      // ── Toast ────────────────────────────────────────────────────────────
+      let toastTimer = null;
+      function showToast(message, isError = false) {
+        toast.textContent = message;
+        toast.classList.toggle('error', !!isError);
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+      }
+
+      // ── Wiring ───────────────────────────────────────────────────────────
+      function bindEvents() {
+        sliderLength.addEventListener('input',  () => handleSliderChange('length'));
+        sliderDigits.addEventListener('input',  () => handleSliderChange('digits'));
+        sliderSpecial.addEventListener('input', () => handleSliderChange('special'));
+        excludeSimilar.addEventListener('change', handleExcludeChange);
+
+        generateBtn.addEventListener('click', handleGenerate);
+        copyBtn.addEventListener('click', handleCopy);
+
+        // Click password field to select all (faster manual copy).
+        passwordField.addEventListener('click', () => {
+          if (passwordField.value) passwordField.select();
+        });
+
+        // Global Enter shortcut. Skip when focus is on a button so the native
+        // click event handles it (avoids double-fire on Generate).
+        document.addEventListener('keydown', e => {
+          if (e.key !== 'Enter' || e.repeat) return;
+          if (e.target && typeof e.target.closest === 'function' && e.target.closest('button')) return;
+          e.preventDefault();
+          handleGenerate();
+        });
+      }
+
+      // ── Init ─────────────────────────────────────────────────────────────
+      function init() {
+        const settings = loadSettings();
+        sliderLength.value     = String(settings.length);
+        sliderDigits.value     = String(settings.digits);
+        sliderSpecial.value    = String(settings.special);
+        excludeSimilar.checked = settings.excludeSimilar;
+
+        enforceConstraints(null);
+        bindEvents();
+
+        // Provide an immediately-usable password on first paint.
+        handleGenerate();
+      }
+
+      init();
+    })();
+  </script>
+
+</body>
+</html>
